@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Calorie Calculator</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                position: relative;
+                background-color: #f9f9f9;
+                color: #333;
+            }
+        
+            h1 {
+                margin-top: 20px;
+                color: #007bff;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            }
+        
+            .container {
+                margin: 20px;
+                width: 80%;
+                max-width: 600px;
+            }
+        
+            .meal-block {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                padding: 15px;
+                border-radius: 10px;
+                background-color: #fff;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+        
+            .meal-block select,
+            .meal-block button {
+                padding: 10px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+        
+            .meal-block select {
+                background-color: #f0f8ff;
+            }
+        
+            .meal-block button {
+                background-color: #007bff;
+                color: white;
+                cursor: pointer;
+                border: none;
+            }
+        
+            .meal-block button:hover {
+                background-color: #0056b3;
+            }
+        
+            .meal-item-block {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+        
+            .last-block {
+                display: flex;
+                justify-content: space-between;
+            }
+        
+            .stats {
+                margin: 20px;
+                width: 80%;
+                max-width: 600px;
+                background-color: #fff;
+                padding: 15px;
+                border-radius: 10px;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+        
+            .buttons {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+            }
+        
+            button {
+                cursor: pointer;
+                padding: 10px;
+                font-size: 14px;
+                border: none;
+                border-radius: 5px;
+                background-color: #007bff;
+                color: white;
+                transition: background-color 0.3s;
+            }
+        
+            button:hover {
+                background-color: #0056b3;
+            }
+        
+            canvas {
+                width: 100%;
+                max-width: 600px;
+            }
+        
+            #bmiCalculator {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                width: 280px;
+                border: 1px solid #ccc;
+                border-radius: 10px;
+                padding: 15px;
+                background-color: #fefefe;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+        
+            #bmiCalculator h3 {
+                text-align: center;
+                color: #007bff;
+            }
+        
+            input {
+                padding: 10px;
+                font-size: 14px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                margin-bottom: 10px;
+                width: 90%;
+            }
+        
+            @media (max-width: 768px) {
+                .container {
+                    flex-direction: column;
+                    align-items: center;
+                }
+        
+                .stats {
+                    margin-right: 1;
+                }
+        
+                #bmiCalculator {
+                    position: static;
+                    width: 80%;
+                    margin-top: 20px;
+                }
+            }
+        </style>        
+    </head>
+    <body>
+        <h1>Calorie Calculator</h1>
+        <div class="container">
+            <div id="meal-section" class="meal-block">
+                <select class="meal-type">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="meal">Lunch</option>
+                    <option value="snacks">Snacks</option>
+                    <option value="dinner">Dinner</option>
+                </select>
+                <div id="meal-items-container">
+                    <div class="meal-item-block">
+                        <select class="meal-item">
+                            <!-- Meal items will be populated dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <button class="add-meal-item">Add Another Item</button>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="buttons">
+                <button id="add-block">Add New Meal Block</button>
+                <button id="submit-report">Submit Meal Report</button>
+            </div>
+            
+            <canvas id="calorieChart"></canvas>
+            <div id="totalCalories" style="margin-top: 20px; font-size: 18px; text-align: center;">
+                Total Calories Consumed Today: 0
+            </div>
+
+            <canvas id="dailyCalorieChart" style="margin-top: 20px;"></canvas>
+        </div>
+
+        <!-- New BMI Calculator -->
+        <!--
+        -->
+        <div id="bmiCalculator">
+            <h3>BMI Calculator</h3>
+            <label for="weight">Weight (kg):</label><br>
+            <input type="number" id="weight" placeholder="Enter weight" style="width: 90%; margin-bottom: 10px;"><br>
+
+            <label for="height">Height (cm):</label><br>
+            <input type="number" id="height" placeholder="Enter height" style="width: 90%; margin-bottom: 10px;"><br>
+
+            <button id="calculateBMI" style="width: 100%; background: #007bff; color: #fff; padding: 10px; border: none; border-radius: 5px;">
+                Calculate BMI
+            </button>
+
+            <div id="bmiResult" style="margin-top: 15px; font-size: 16px; text-align: center;"></div>
+        </div>
+    </body>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // username
+        let userName = "";
+
+        fetch('/getUsername')
+            .then(response => response.json())
+            .then(data => {
+            username = data.username;
+            console.log('Welcome, ' + username);
+            })
+            .catch(err => {
+            console.error('Error fetching username', err);
+            });
+        
+        let userMealData = {
+            "breakfast": [],
+            "meal": [],
+            "snacks": [],
+            "dinner": []
+        };
+        
+        const foodData = {
+            "breakfast": {
+                "Oatmeal (1 bowl)": 150,
+                "Scrambled Eggs (2 eggs)": 200,
+                "Banana (1 medium)": 105,
+                "Whole Wheat Toast (2 slices)": 160
+            },
+            "meal": {
+                "Grilled Chicken Breast (200g)": 330,
+                "Brown Rice (1 cup)": 215,
+                "Mixed Vegetables (1 cup)": 100,
+                "Salmon (150g)": 280
+            },
+            "snacks": {
+                "Apple (1 medium)": 95,
+                "Almonds (20 pieces)": 140,
+                "Greek Yogurt (1 cup)": 120,
+                "Carrot Sticks (1 cup)": 50
+            },
+            "dinner": {
+                "Spaghetti with Tomato Sauce (1 plate)": 300,
+                "Grilled Tofu (200g)": 240,
+                "Caesar Salad (1 bowl)": 200,
+                "Baked Potato (1 medium)": 160
+            }
+        };       
+
+        // Initialize the daily calorie graph
+        const dailyCtx = document.getElementById('dailyCalorieChart').getContext('2d');
+        const dailyCalorieChart = new Chart(dailyCtx, {
+            type: 'line', // You can use 'bar' for a bar chart instead
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Calories Per Day',
+                    data: [],
+                    borderColor: 'blue',
+                    backgroundColor: 'rgba(0, 0, 255, 0.3)',
+                    fill: true,
+                    tension: 0.2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Daily Calorie Intake'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Date'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Calories'
+                        }
+                    }
+                }
+            }
+        });
+
+        const calorieChartCtx = document.getElementById('calorieChart').getContext('2d');
+        const calorieChart = new Chart(calorieChartCtx, {
+            type: 'bar',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Calories',
+                    data: [],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        const container = document.querySelector('.container');
+        const mealSection = document.getElementById('meal-section');
+        const addBlockButton = document.getElementById('add-block');
+        const submitReportButton = document.getElementById('submit-report');
+
+        /* regenerating from stored data
+        const currentDate = new Date().toLocaleDateString();
+        localStorage.setItem('userMealData', JSON.stringify({currentDate: userMealData}));
+        const storedData = localStorage.getItem('userMealData')[currentDate];
+        if (storedData) {
+            userMealData = JSON.parse(storedData);
+            regenerateGraph(); // Rebuild the graph from stored data
+        }
+        */
+
+        // functions
+
+        function populateMealItems(mealType, itemSelect) {
+            const items = foodData[mealType];
+            itemSelect.innerHTML = "";
+            Object.entries(items).forEach(([name, calories]) => {
+                const option = document.createElement('option');
+                option.textContent = `${name} (${calories} cal)`;
+                option.value = name;
+                option.setAttribute('data-calories', calories);
+                itemSelect.appendChild(option);
+            });
+        }
+
+        async function regenerateGraph() {
+            let mealData = {};
+            let totalCalories = 0;
+
+            try {
+                const currentDate = new Date().toLocaleDateString();
+                const response = await fetch('/retrieveCalorieData', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: currentDate
+                });
+          
+                if (!response.ok) {
+                    throw new Error('Failed to retrieve calorie data');
+                }
+                metaData = await response.json();
+                console.log("regenerateGraph: ", metaData);
+              } catch (err) {
+                console.error('Error submitting data:', err);
+                alert('Error submitting data');
+              }
+                    
+            Object.keys(userMealData).forEach(mealType => {
+                const totalMealCalories = userMealData[mealType].reduce((sum, item) => sum + item.calories, 0);
+                mealData[mealType] = totalMealCalories;
+                totalCalories += totalMealCalories;
+            });
+        
+            // Update the graph
+            calorieChart.data.labels = Object.keys(mealData);
+            calorieChart.data.datasets[0].data = Object.values(mealData);
+            calorieChart.update();
+        
+            const totalCaloriesDiv = document.getElementById('totalCalories');
+            totalCaloriesDiv.textContent = `Total Calories Consumed Today: ${totalCalories}`;
+        }      
+        
+        // Function to update the daily calorie chart
+        async function updateDailyCalorieChart() {
+            let calories_per_day = [];
+            try {
+                
+                const response = await fetch('/retrieveGraphData', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  }
+                });
+          
+                if (!response.ok) {
+                    throw new Error('Failed to retrieve graph data');
+                }
+                calories_per_day = await response.json();
+                console.log("updateDailyCalorieChart: ", calories_per_day);
+              } catch (err) {
+                console.error('Error retrieving data:', err);
+                alert('Error retrieving data');
+              }
+            const transformedData = calories_per_day.reduce((acc, doc) => {
+            // Extract the date and value pair, excluding `_id`
+            Object.entries(doc).forEach(([key, value]) => {
+                if (key !== "_id") {
+                acc[key] = value; // Add date-value pair to the accumulator
+                }
+            });
+            return acc;
+            }, {});
+            const dates = Object.keys(transformedData);
+            const totals = Object.values(transformedData);
+
+            // Update chart data
+            dailyCalorieChart.data.labels = dates;
+            dailyCalorieChart.data.datasets[0].data = totals;
+
+            // Refresh the chart
+            dailyCalorieChart.update();
+        }
+
+        
+        async function uploadUserData(data, totCalories){
+            try {
+                const upload_data = {data, totCalories};
+                console.log("uploadUserData: ", upload_data);
+                const response = await fetch('/storeCalorieData', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(upload_data)
+                });
+          
+                if (response.ok) {
+                  alert('Data stored successfully');
+                } else {
+                  const errorMessage = await response.text();
+                  alert('Error: ' + errorMessage);
+                }
+              } catch (err) {
+                console.error('Error submitting data:', err);
+                alert('Error submitting data');
+              }
+        }
+
+        document.getElementById('calculateBMI').addEventListener('click', () => {
+            const weight = parseFloat(document.getElementById('weight').value);
+            const height = parseFloat(document.getElementById('height').value) / 100; // Convert cm to meters
+        
+            if (weight && height) {
+                const bmi = (weight / (height * height)).toFixed(2); // Calculate BMI
+                let status;
+        
+                if (bmi < 18.5) status = 'Underweight';
+                else if (bmi < 24.9) status = 'Normal weight';
+                else if (bmi < 29.9) status = 'Overweight';
+                else status = 'Obese';
+        
+                document.getElementById('bmiResult').textContent = `Your BMI: ${bmi} (${status})`;
+            } else {
+                document.getElementById('bmiResult').textContent = 'Please enter valid weight and height.';
+            }
+        });
+
+        // Handle meal type change
+        container.addEventListener('change', (event) => {
+            if (event.target.classList.contains('meal-type')) {
+                const mealType = event.target.value;
+                const mealItemsContainer = event.target.nextElementSibling;
+                const firstMealItem = mealItemsContainer.querySelector('.meal-item');
+                populateMealItems(mealType, firstMealItem);
+            }
+        });
+
+        // Add another meal item dropdown
+        mealSection.querySelector('.add-meal-item').addEventListener('click', (e) => {
+            const itemsContainer = e.target.previousElementSibling;
+            const mealType = e.target.closest('.meal-block').querySelector('.meal-type').value;
+            const newMealItemBlock = document.createElement('div');
+            newMealItemBlock.classList.add('meal-item-block');
+            const newMealSelect = document.createElement('select');
+            newMealSelect.classList.add('meal-item');
+            populateMealItems(mealType, newMealSelect);
+            newMealItemBlock.appendChild(newMealSelect);
+            itemsContainer.appendChild(newMealItemBlock);
+        });
+
+        // Add a new meal block without duplicating extra items
+        addBlockButton.addEventListener('click', () => {
+            const newBlock = mealSection.cloneNode(true); // Clone the template block
+
+            // Reset the new block to have only the first meal item
+            const mealItemsContainer = newBlock.querySelector('#meal-items-container');
+            mealItemsContainer.innerHTML = ''; 
+            const newMealItemBlock = document.createElement('div');
+            newMealItemBlock.classList.add('meal-item-block');
+            const newMealSelect = document.createElement('select');
+            newMealSelect.classList.add('meal-item');
+            mealItemsContainer.appendChild(newMealItemBlock);
+            newMealItemBlock.appendChild(newMealSelect);
+
+            // Set the first dropdown to the default meal type and populate it
+            const newMealType = newBlock.querySelector('.meal-type');
+            populateMealItems(newMealType.value, newMealSelect);
+
+            // Rebind the "Add Another Item" button for the new block
+            const addMealItemButton = newBlock.querySelector('.add-meal-item');
+            addMealItemButton.addEventListener('click', (e) => {
+                const itemsContainer = e.target.previousElementSibling;
+                const mealType = e.target.closest('.meal-block').querySelector('.meal-type').value;
+                const newMealItemBlock = document.createElement('div');
+                newMealItemBlock.classList.add('meal-item-block');
+                const newMealSelect = document.createElement('select');
+                newMealSelect.classList.add('meal-item');
+                populateMealItems(mealType, newMealSelect);
+                newMealItemBlock.appendChild(newMealSelect);
+                itemsContainer.appendChild(newMealItemBlock);
+            });
+            // Append the new block to the container
+            container.appendChild(newBlock, addBlockButton);
+        });
+
+        // Submit the meal report
+        submitReportButton.addEventListener('click', () => {
+            const mealBlocks = document.querySelectorAll('.meal-block');
+            const currentDate = new Date().toLocaleDateString();
+            userMealData = { "breakfast": [], "meal": [], "snacks": [], "dinner": [] }; // Reset before updating
+            let totalCalories = 0;
+        
+            mealBlocks.forEach(block => {
+                const mealType = block.querySelector('.meal-type').value;
+                const mealItems = block.querySelectorAll('.meal-item');
+        
+                mealItems.forEach(item => {
+                    const foodName = item.options[item.selectedIndex].textContent;
+                    const calories = parseInt(item.options[item.selectedIndex].getAttribute('data-calories'));
+        
+                    // Add food item to the userMealData
+                    userMealData[mealType].push({ food: foodName, calories: calories });
+                    // Update total calories
+                    totalCalories += calories;
+                });
+            });
+            
+            // Update the chart
+            const mealData = {};
+            Object.keys(userMealData).forEach(mealType => {
+                mealData[mealType] = userMealData[mealType].reduce((sum, item) => sum + item.calories, 0);
+            });
+        
+            calorieChart.data.labels = Object.keys(mealData);
+            calorieChart.data.datasets[0].data = Object.values(mealData);
+            calorieChart.update();
+
+            // store data locally
+            const uploadData = userMealData;
+            localStorage.setItem('userMealData', JSON.stringify(userMealData));
+        
+            // Display total calories
+            const totalCaloriesDiv = document.getElementById('totalCalories');
+            totalCaloriesDiv.textContent = `Total Calories Consumed: ${totalCalories}`;
+            console.log("uploadUserData", JSON.stringify(userMealData), totalCalories);
+            uploadUserData(JSON.stringify(userMealData), totalCalories);
+        });
+        
+        // Initialize the first meal block
+        const firstMealType = mealSection.querySelector('.meal-type').value;
+        const firstMealItem = mealSection.querySelector('.meal-item');
+        populateMealItems(firstMealType, firstMealItem);
+        updateDailyCalorieChart();
+
+    </script>
+</body>
+</html>

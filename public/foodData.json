@@ -1,0 +1,26 @@
+{
+    "breakfast": {
+      "Oatmeal (1 bowl)": 150,
+      "Scrambled Eggs (2 eggs)": 200,
+      "Banana (1 medium)": 105,
+      "Whole Wheat Toast (2 slices)": 160
+    },
+    "meal": {
+      "Grilled Chicken Breast (200g)": 330,
+      "Brown Rice (1 cup)": 215,
+      "Mixed Vegetables (1 cup)": 100,
+      "Salmon (150g)": 280
+    },
+    "snacks": {
+      "Apple (1 medium)": 95,
+      "Almonds (20 pieces)": 140,
+      "Greek Yogurt (1 cup)": 120,
+      "Carrot Sticks (1 cup)": 50
+    },
+    "dinner": {
+      "Spaghetti with Tomato Sauce (1 plate)": 300,
+      "Grilled Tofu (200g)": 240,
+      "Caesar Salad (1 bowl)": 200,
+      "Baked Potato (1 medium)": 160
+    }
+}
